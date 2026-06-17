@@ -9,7 +9,7 @@ All manifests are namespace-agnostic — apply them into your own namespace with
 | File | Block | Topic |
 |------|-------|-------|
 | `01-postgres-statefulset.yaml` | 2 | Postgres as a **StatefulSet** (own volume) + a Service `db`. |
-| `02-switch-app-to-postgres.yaml` | 2 | Switch the app SQLite → Postgres — only `DB_DRIVER` + `DATABASE_URL` change. Then `kubectl rollout restart deploy/app`. |
+| `02-switch-app-to-postgres.yaml` | 2 | Switch the app SQLite → Postgres: `DB_DRIVER` + `DATABASE_URL` change **and** the Deployment drops the SQLite `/data` PVC mount (state is in Postgres now). Apply → rollout, then `kubectl delete pvc app-data`. |
 | `03-seed-job.yaml` | 2 | A **Job** that seeds a few demo TODOs into the DB (runs once → Completed). |
 | `04-cleanup-cronjob.yaml` | 2 | A **CronJob** that deletes completed TODOs every 5 min (force a run with `kubectl create job --from=cronjob/cleanup`). |
 | `05-httproute.yaml` | 4 | **Variant A — Gateway API:** an HTTPRoute attaching the app to the shared Gateway (public HTTPS). |

@@ -1,6 +1,10 @@
-# Block 6 — switch the app from SQLite to Postgres WITHOUT changing the image.
-# Only two values change (DB_DRIVER + DATABASE_URL), injected via ConfigMap/Secret.
-# Apply, then:  kubectl rollout restart -n student-NN deploy/app
+# Day 3 / Block 2 — switch the app from SQLite to Postgres WITHOUT changing the image.
+# Two things change:
+#   (1) DB_DRIVER + DATABASE_URL  (ConfigMap/Secret)
+#   (2) the app no longer needs a local volume, so the SQLite PVC mount is REMOVED from
+#       the Deployment (state lives in Postgres now). The removed bits are left here as
+#       comments so you can see exactly what changed vs. day2/06-deployment-app.yaml.
+# Apply, watch the rollout, then delete the now-unused app-data PVC.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,7 +15,7 @@ data:
   COMPANY_NAME: "Workshop"
   THEME: "navy"
   LOG_LEVEL: "info"
-  DB_DRIVER: "postgres"          # <- changed
+  DB_DRIVER: "postgres"          # <- changed (was sqlite)
 ---
 apiVersion: v1
 kind: Secret
@@ -23,3 +27,47 @@ type: Opaque
 stringData:
   AUTH_PASSWORD: "lab-secret"
   DATABASE_URL: "postgres://todo:todo@db:5432/todo?sslmode=disable"   # <- added
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      # securityContext:            # REMOVED — no mounted volume to make group-writable
+      #   fsGroup: 10001
+      containers:
+        - name: app
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.0
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret
+          # volumeMounts:           # REMOVED — the app no longer writes to /data
+          #   - name: data
+          #     mountPath: /data
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+      # volumes:                    # REMOVED — the app-data PVC is no longer used (delete it)
+      #   - name: data
+      #     persistentVolumeClaim:
+      #       claimName: app-data
