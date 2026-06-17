@@ -36,6 +36,8 @@ metadata:
     app: todo
 spec:
   replicas: 1
+  # strategy:        # REMOVED — no mounted volume, multiple pods can run simultaneously
+  #   type: Recreate
   selector:
     matchLabels:
       app: todo
