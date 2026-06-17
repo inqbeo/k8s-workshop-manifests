@@ -12,8 +12,9 @@ All manifests are namespace-agnostic — apply them into your own namespace with
 | `02-switch-app-to-postgres.yaml` | 2 | Switch the app SQLite → Postgres: `DB_DRIVER` + `DATABASE_URL` change **and** the Deployment drops the SQLite `/data` PVC mount (state is in Postgres now). Apply → rollout, then `kubectl delete pvc app-data`. |
 | `03-seed-job.yaml` | 2 | A **Job** that seeds a few demo TODOs into the DB (runs once → Completed). |
 | `04-cleanup-cronjob.yaml` | 2 | A **CronJob** that deletes completed TODOs every 5 min (force a run with `kubectl create job --from=cronjob/cleanup`). |
-| `05-httproute.yaml` | 4 | **Variant A — Gateway API:** an HTTPRoute attaching the app to the shared Gateway (public HTTPS). |
-| `06-ingress.yaml` | 4 | **Variant B — classic Ingress:** the same goal via an Ingress (TLS via cert-manager). |
+| `05-gateway.yaml` | 4 | **Variant A — Gateway API (1/2):** your **own** Gateway (per namespace), HTTP/HTTPS listeners for your host + per-student cert (cert-manager annotation). Apply first. |
+| `05-httproute.yaml` | 4 | **Variant A — Gateway API (2/2):** an HTTPRoute attaching the app Service to **your** Gateway. Apply after `05-gateway.yaml`. |
+| `06-ingress.yaml` | 4 | **Variant B — classic Ingress:** the same goal via a single Ingress (TLS via cert-manager). |
 | `07-networkpolicy.yaml` | 5 | A **NetworkPolicy**: only the app Pods may reach the DB on 5432. |
 
 > The HA database (CloudNativePG operator), Kustomize/Helm, GitOps and Rancher
@@ -28,8 +29,9 @@ kubectl -n $NS rollout restart deploy/app        # data now lives in Postgres
 kubectl apply -n $NS -f 03-seed-job.yaml          # seed demo TODOs (a Job)
 kubectl apply -n $NS -f 04-cleanup-cronjob.yaml   # tidy up on a schedule
 
-# Block 4 — public HTTPS URL (pick ONE; your namespace goes into the host (the lab guide does this via sed))
-kubectl apply -n $NS -f 05-httproute.yaml         # Variant A — Gateway API
+# Block 4 — public HTTPS URL (pick ONE variant; your namespace goes into the host — the lab guide does this via sed)
+kubectl apply -n $NS -f 05-gateway.yaml           # Variant A (1/2) — your Gateway
+kubectl apply -n $NS -f 05-httproute.yaml         # Variant A (2/2) — the HTTPRoute
 # kubectl apply -n $NS -f 06-ingress.yaml         # Variant B — classic Ingress
 
 # Block 5 — only the app may reach the DB

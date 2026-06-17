@@ -1,0 +1,42 @@
+# Day 3 / Block 4 — VARIANT A (Gateway API), part 1 of 2: YOUR Gateway.
+#
+# Each student runs their OWN Gateway in their own namespace. We do NOT attach to the
+# platform's central Gateway: its HTTPS cert only covers shared hosts (gateway./gitea./
+# quiz./feedback.), not app-<you>. This Gateway owns the HTTP/HTTPS listeners for YOUR
+# host; the cert-manager annotation makes cert-manager issue a per-student cert into the
+# app-tls Secret (Let's Encrypt HTTP-01, solved through Traefik). The "how" is Day 4.
+#
+# Apply this FIRST, then 05-httproute.yaml.
+#
+#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07) <<<
+#   kubectl apply    -n <your-namespace> -f day3/05-gateway.yaml
+#   kubectl describe -n <your-namespace> gateway app
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: app                     # same name as the Service/Route — different kind, no clash
+  labels:
+    app: todo
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      protocol: HTTP
+      port: 80
+      hostname: app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes your host
+      allowedRoutes:
+        namespaces:
+          from: Same            # only routes from THIS namespace may attach
+    - name: websecure
+      protocol: HTTPS
+      port: 443
+      hostname: app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes your host
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: app-tls        # cert-manager fills this in
+      allowedRoutes:
+        namespaces:
+          from: Same
