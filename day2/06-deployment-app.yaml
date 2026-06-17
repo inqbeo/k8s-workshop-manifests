@@ -25,7 +25,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch   # optional: faster on large/already-correct volumes
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.1
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.2
           ports:
             - containerPort: 8080
           envFrom:
