@@ -1,0 +1,23 @@
+# Day 4 / Lab 15 — a highly-available Postgres via the CloudNativePG (cnpg) operator.
+# ONE declarative Cluster → a primary + two replicas, a read-write Service that always
+# points at the current primary (db-rw), and an app Secret (db-app, basic-auth) holding
+# a ready-to-use connection string under the `uri` key. The operator is already
+# installed cluster-wide; you only create this Cluster in your namespace.
+#
+#   kubectl apply -n <your-namespace> -f day4/01-pg-cluster.yaml
+#   kubectl get cluster,pods -l cnpg.io/cluster=db
+#   kubectl get svc,secret | grep -E 'db-rw|db-app'
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: db
+  labels:
+    app: todo
+spec:
+  instances: 3                 # 1 primary + 2 replicas (synchronous-capable)
+  storage:
+    size: 1Gi                  # uses the default StorageClass (Longhorn on this cluster)
+  bootstrap:
+    initdb:
+      database: todo
+      owner: todo              # cnpg generates the db-app Secret (uri/host/port/username/password)

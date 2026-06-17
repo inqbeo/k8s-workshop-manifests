@@ -1,0 +1,50 @@
+# Day 4 / Lab 15 — point the app at the HA database. cnpg put a ready-to-use
+# connection string in the db-app Secret's `uri` key; we feed that to the app as
+# DATABASE_URL. An explicit `env` entry wins over the same key coming in via
+# `envFrom` (the Day-3 value in app-secret), so this cleanly re-targets the app at
+# the cnpg read-write Service (db-rw) without editing the Secret.
+#
+#   kubectl apply        -n <your-namespace> -f day4/02-switch-app-to-cnpg.yaml
+#   kubectl rollout restart -n <your-namespace> deploy/app
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.2
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret
+          env:
+            - name: DB_DRIVER
+              value: "postgres"
+            - name: DATABASE_URL          # overrides the Day-3 value — points at cnpg's db-rw
+              valueFrom:
+                secretKeyRef:
+                  name: db-app            # created by cnpg (Cluster "db")
+                  key: uri
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5

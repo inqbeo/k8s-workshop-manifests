@@ -1,0 +1,8 @@
+# Day 4 / Lab 13 — prod overlay: a strategic-merge patch that only changes replicas.
+# Kustomize merges this onto the base Deployment "app" — nothing else is repeated.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 3

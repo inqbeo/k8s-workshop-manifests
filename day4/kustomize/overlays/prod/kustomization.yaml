@@ -1,0 +1,17 @@
+# Day 4 / Lab 13 — prod overlay. The whole "logic", and there's barely any:
+# reference the base, patch replicas to 3, and merge two values into app-config.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - path: replicas-3.yaml          # strategic-merge
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge                # merge into the base's generated app-config
+    literals:
+      - COMPANY_NAME=ACME
+      - THEME=navy

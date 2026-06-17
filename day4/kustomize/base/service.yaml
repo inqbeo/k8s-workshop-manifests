@@ -1,0 +1,15 @@
+# Day 4 / Lab 13 — Kustomize base: the ClusterIP Service for the app.
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  type: ClusterIP
+  selector:
+    app: todo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
