@@ -1,12 +1,52 @@
-# Block 4 — VARIANT A (Gateway API): expose the app on a public HTTPS URL.
-# The platform team owns the shared Gateway + its listeners (incl. the wildcard
-# TLS cert for *.k8s-workshop.inqbeo.academy). You (app team) only attach an
-# HTTPRoute that says "this host → my Service".
+# Day 3 / Block 4 — VARIANT A (Gateway API): expose the app on a public HTTPS URL.
 #
-#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07, or "trainer") <<<
-#   kubectl apply   -n <your-namespace> -f day3/05-httproute.yaml
+# The Gateway API splits the old Ingress into two objects:
+#   * Gateway   — the L7 entry: listeners, ports, TLS  (here: YOUR own, per namespace)
+#   * HTTPRoute — "this host -> my Service"            (the app team's part)
+#
+# IMPORTANT — each student runs THEIR OWN Gateway in their own namespace. We do NOT
+# attach to the platform's central Gateway: its HTTPS cert only covers shared hosts
+# (gateway./gitea./quiz./feedback.), not app-<you>.  Your Gateway carries the cert for
+# YOUR host — cert-manager's gateway-shim issues it into app-tls (Let's Encrypt
+# HTTP-01, solved through Traefik). The "how" is Day 4; today it just happens.
+#
+#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07) <<<
+#   kubectl apply    -n <your-namespace> -f day3/05-httproute.yaml
+#   kubectl describe -n <your-namespace> gateway app
 #   kubectl describe -n <your-namespace> httproute app
 #   # open https://app-studentNN.k8s-workshop.inqbeo.academy  (valid padlock)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: app                     # same name as the Service/Ingress — different kind, no clash
+  labels:
+    app: todo
+  annotations:
+    # cert-manager (gateway-shim) sees this + the listener below and issues a cert
+    # for your host into the app-tls Secret (HTTP-01 via Traefik).
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      protocol: HTTP
+      port: 80
+      hostname: app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes your host
+      allowedRoutes:
+        namespaces:
+          from: Same          # only routes from THIS namespace may attach
+    - name: websecure
+      protocol: HTTPS
+      port: 443
+      hostname: app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes your host
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: app-tls       # cert-manager fills this in
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -15,19 +55,17 @@ metadata:
     app: todo
 spec:
   parentRefs:
-    - name: shared-gateway        # the cluster's shared Gateway…
-      namespace: gateway          # …lives in the platform namespace
+    - name: app                 # YOUR Gateway above, in this namespace (no cross-namespace)
+      kind: Gateway
   hostnames:
-    - app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes this (app-student-07 … / app-trainer)
+    - app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes your host
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: app               # our ClusterIP Service from Day 2
+        - name: app             # the ClusterIP Service from Day 2
           port: 8080
-# TLS: terminated by the Gateway's HTTPS listener (wildcard Let's Encrypt cert,
-# issued automatically by cert-manager — the "how" is Day 4).
-# http -> https: the shared Gateway's :80 listener redirects to :443, so plain
-# http requests are bumped to https automatically. Nothing to do here.
+# TLS is terminated by THIS Gateway's HTTPS listener (your per-student cert in app-tls).
+# Plain http -> https is handled by Traefik's entrypoints.
