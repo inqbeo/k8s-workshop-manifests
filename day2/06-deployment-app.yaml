@@ -16,6 +16,13 @@ spec:
       labels:
         app: todo
     spec:
+      # The app runs as a non-root user; the Longhorn volume is mounted root-owned.
+      # fsGroup makes the mounted volume group-owned by the app's GID so it can
+      # write its SQLite file (without this the container crashes:
+      # "unable to open database file"). Deeper than today's scope — just know it's here.
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch   # optional: faster on large/already-correct volumes
       containers:
         - name: app
           image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.0

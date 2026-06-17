@@ -17,9 +17,10 @@ Day 1, now deployed to Kubernetes, unchanged.
 | `03-configmap.yaml` | 5 | Config as a cluster object (`COMPANY_NAME`, `THEME`, `LOG_LEVEL`). |
 | `04-secret.yaml` | 5 | The app password as a Secret (base64, **not** encrypted). |
 | `05-pvc.yaml` | 5 | A `ReadWriteOnce` PVC for `/data` — data survives Pod restarts. |
-| `06-deployment-app.yaml` | 5 | The “full” Deployment: `envFrom` ConfigMap+Secret, PVC mount, probes. Supersedes `02`. |
+| `06-deployment-app.yaml` | 5 | The “full” Deployment: `envFrom` ConfigMap+Secret, PVC mount, `fsGroup`, probes. Supersedes `02`. Switch its `strategy` to `Recreate` so a single RWO volume is never double-mounted. |
 | `07-service.yaml` | 6 | A `ClusterIP` Service — reach the app in-cluster as `app:8080`. |
 | `08-debug-pod.yaml` | 6 | A `network-multitool` pod to test service discovery by name / DNS. |
+| `09-whoami.yaml` | 6 | A stateless, scalable `traefik/whoami` Deployment + Service — used to *see* a Service round-robin across replicas (the todo app can't: single RWO PVC). |
 
 > **Day 2 stays on SQLite + a PVC.** A real database (Postgres as a StatefulSet)
 > and switching the app over to it now live in **`../day3/`** — together with
