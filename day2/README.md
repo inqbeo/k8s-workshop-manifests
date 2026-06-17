@@ -1,7 +1,7 @@
 # Day 2 — Lab manifests
 
 Plain Kubernetes YAML for the Day-2 labs (Kubernetes basics). Built around the
-demo app `ghcr.io/inqbeo/containerization-demo-webapp:0.1.0` — the same app from
+demo app `ghcr.io/inqbeo/containerization-demo-webapp:0.1.1` — the same app from
 Day 1, now deployed to Kubernetes, unchanged.
 
 > Apply everything **into your own namespace**:
