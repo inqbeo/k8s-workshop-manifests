@@ -50,6 +50,13 @@ spec:
           image: postgres:16-alpine
           ports:
             - containerPort: 5432
+          env:
+            # The PVC's filesystem root is mounted at the data dir, and a fresh
+            # ext4 volume always has a lost+found there -> initdb refuses it as
+            # "not empty". Put the data one level deeper, in a subdirectory of
+            # the mount (exactly what the initdb hint suggests).
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           envFrom:
             - secretRef:
                 name: db-secret
