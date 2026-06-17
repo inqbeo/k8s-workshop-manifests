@@ -1,0 +1,49 @@
+# Block 2 — a CronJob that keeps the list tidy: every 5 minutes it deletes the
+# TODOs that are marked done. A CronJob WRAPS a Job and creates one on each tick.
+#
+#   kubectl apply  -n student-NN -f day3/04-cleanup-cronjob.yaml
+#   # don't want to wait 5 min in the lab? force a run now:
+#   kubectl create job -n student-NN --from=cronjob/cleanup run-now
+#   kubectl logs       -n student-NN job/run-now
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup
+  labels:
+    app: todo
+spec:
+  schedule: "*/5 * * * *"          # every 5 minutes (standard cron syntax)
+  concurrencyPolicy: Forbid        # never let two cleanup runs overlap
+  successfulJobsHistoryLimit: 3    # keep the last few finished Jobs…
+  failedJobsHistoryLimit: 1        # …and one failed one, for inspection
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 300
+      template:
+        metadata:
+          labels:
+            app: todo-cleanup
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: cleanup
+              image: postgres:16-alpine
+              env:
+                - name: PGHOST
+                  value: db
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_PASSWORD } }
+                - name: PGDATABASE
+                  valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_DB } }
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -e
+                  deleted=$(psql -tA -v ON_ERROR_STOP=1 \
+                    -c "DELETE FROM todos WHERE done = true; SELECT count(*);" \
+                    | tail -n1)
+                  echo "cleanup: removed completed TODOs (rows affected reported by psql above)"
+                  psql -tAc "SELECT count(*) || ' todos remaining' FROM todos;"

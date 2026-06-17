@@ -1,0 +1,13 @@
+# Block 6 — a throwaway debug pod to test service discovery from inside the cluster:
+#   kubectl exec -n student-NN -it netshoot -- curl http://app:8080/healthz
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netshoot
+  labels:
+    app: debug
+spec:
+  containers:
+    - name: tools
+      image: wbitt/network-multitool
+      command: ["sleep", "infinity"]

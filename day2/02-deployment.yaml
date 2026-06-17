@@ -1,0 +1,39 @@
+# Block 4 — ReplicaSet -> Deployment
+# Minimal Deployment (config still inline). Rolling update by changing
+# COMPANY_NAME / THEME below, then: kubectl apply -n student-NN -f 02-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: COMPANY_NAME
+              value: "Workshop"
+            - name: THEME
+              value: "coral"        # try: navy / dark  -> rolling update
+            - name: AUTH_PASSWORD
+              value: "lab-secret"
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5

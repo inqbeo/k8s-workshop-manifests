@@ -1,0 +1,57 @@
+# Block 2 — a Job that seeds the fresh Postgres DB with a few demo TODOs.
+# A Job runs ONCE to completion (then shows Completed) — perfect for seeding.
+# It talks straight to the DB via the in-cluster Service `db:5432`.
+#
+#   kubectl apply -n student-NN -f day3/03-seed-job.yaml
+#   kubectl logs   -n student-NN job/seed-todos
+#
+# Order matters: deploy the DB (01) and switch the app (02) FIRST, so the app
+# has created the `todos` table. The job waits for the table just in case.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-todos
+  labels:
+    app: todo
+spec:
+  backoffLimit: 3              # retry a few times on failure
+  ttlSecondsAfterFinished: 600 # auto-clean the finished Job after 10 min
+  template:
+    metadata:
+      labels:
+        app: todo-seed
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: postgres:16-alpine
+          # psql reads these standard PG* env vars automatically:
+          env:
+            - name: PGHOST
+              value: db
+            - name: PGUSER
+              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_USER } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_PASSWORD } }
+            - name: PGDATABASE
+              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_DB } }
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "Waiting for the app to create the 'todos' table ..."
+              until psql -tAc "SELECT to_regclass('public.todos')" | grep -q '^todos$'; do
+                echo "  …not there yet, retrying in 2s"; sleep 2
+              done
+              echo "Seeding demo TODOs into Postgres at $PGHOST ..."
+              psql -v ON_ERROR_STOP=1 <<'SQL'
+              INSERT INTO todos (title, done) VALUES
+                ('Welcome to the Kubernetes workshop',            false),
+                ('Run Postgres as a StatefulSet',                 true),
+                ('Switch the app with config only',               true),
+                ('Make the app public over HTTPS',                false),
+                ('Lock down traffic with a NetworkPolicy',        false),
+                ('Scale the app and watch the load spread',       false);
+              SQL
+              echo "Done. The table now holds:"
+              psql -tAc "SELECT count(*) || ' todos' FROM todos;"

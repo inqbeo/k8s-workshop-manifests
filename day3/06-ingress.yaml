@@ -1,0 +1,38 @@
+# Block 4 — VARIANT B (classic Ingress): the same goal, the other shape.
+# Pick ONE variant in the lab (the trainer says which). Both work in our cluster
+# (Traefik serves Ingress AND Gateway API on the same IP).
+#
+#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07, or "trainer") <<<
+#   kubectl apply   -n <your-namespace> -f day3/06-ingress.yaml
+#   kubectl describe -n <your-namespace> ingress app
+#   # open https://app-studentNN.k8s-workshop.inqbeo.academy  (valid padlock)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+  labels:
+    app: todo
+  annotations:
+    # cert-manager watches this and issues a Let's Encrypt cert into app-tls
+    # (HTTP-01 challenge). The "how" is Day 4 — today it just happens.
+    cert-manager.io/cluster-issuer: letsencrypt
+    # Traefik: send plain http to https automatically.
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-redirect-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes this (app-student-07 … / app-trainer)
+      secretName: app-tls
+  rules:
+    - host: app-studentNN.k8s-workshop.inqbeo.academy # <- the guide's sed substitutes this (app-student-07 … / app-trainer)
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080

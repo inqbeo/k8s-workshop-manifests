@@ -1,0 +1,15 @@
+# Block 6 — a stable address for the app (ClusterIP, internal). Reach it as: app:8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  type: ClusterIP
+  selector:
+    app: todo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

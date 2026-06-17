@@ -1,0 +1,33 @@
+# Block 4 — VARIANT A (Gateway API): expose the app on a public HTTPS URL.
+# The platform team owns the shared Gateway + its listeners (incl. the wildcard
+# TLS cert for *.k8s-workshop.inqbeo.academy). You (app team) only attach an
+# HTTPRoute that says "this host → my Service".
+#
+#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07, or "trainer") <<<
+#   kubectl apply   -n <your-namespace> -f day3/05-httproute.yaml
+#   kubectl describe -n <your-namespace> httproute app
+#   # open https://app-studentNN.k8s-workshop.inqbeo.academy  (valid padlock)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  parentRefs:
+    - name: shared-gateway        # the cluster's shared Gateway…
+      namespace: gateway          # …lives in the platform namespace
+  hostnames:
+    - app-studentNN.k8s-workshop.inqbeo.academy   # <- the guide's sed substitutes this (app-student-07 … / app-trainer)
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: app               # our ClusterIP Service from Day 2
+          port: 8080
+# TLS: terminated by the Gateway's HTTPS listener (wildcard Let's Encrypt cert,
+# issued automatically by cert-manager — the "how" is Day 4).
+# http -> https: the shared Gateway's :80 listener redirects to :443, so plain
+# http requests are bumped to https automatically. Nothing to do here.

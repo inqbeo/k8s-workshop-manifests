@@ -1,0 +1,18 @@
+# Block 3 — Pods: the building block
+# A bare Pod running the demo app (SQLite mode, ephemeral, no volume/config yet).
+# Apply into your namespace:  kubectl apply -n student-NN -f 01-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  containers:
+    - name: app
+      image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.0
+      ports:
+        - containerPort: 8080
+      env:
+        - name: AUTH_PASSWORD
+          value: "lab-secret"   # otherwise a random one is generated & logged

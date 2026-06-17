@@ -1,0 +1,12 @@
+# Block 5 — Configuration as a cluster object
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: todo
+data:
+  COMPANY_NAME: "Workshop"
+  THEME: "coral"          # coral | navy | dark
+  LOG_LEVEL: "info"
+  DB_DRIVER: "sqlite"     # switched to "postgres" in Block 6

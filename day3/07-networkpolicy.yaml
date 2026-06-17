@@ -1,0 +1,29 @@
+# Block 5 — lock down the DB: only the app may reach Postgres.
+# Default in Kubernetes is "everyone talks to everyone". This policy selects the
+# DB Pods and allows ingress ONLY from Pods labelled app=todo, on port 5432.
+# Everything else (e.g. a debug Pod) is then blocked from the DB.
+#
+# NOTE: NetworkPolicies are enforced by the CNI — our cluster runs Cilium, so
+# they take effect. On a CNI that ignores them, this would be a no-op.
+#
+#   kubectl apply -n student-NN -f day3/07-networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-allow-app-only
+  labels:
+    app: todo-db
+spec:
+  podSelector:
+    matchLabels:
+      app: todo-db          # this policy governs the DB Pods
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: todo     # only the app Pods may connect…
+      ports:
+        - protocol: TCP
+          port: 5432        # …and only to Postgres

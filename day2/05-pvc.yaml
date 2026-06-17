@@ -1,0 +1,14 @@
+# Block 5 — Persistent storage for /data (SQLite file survives Pod restarts)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-data
+  labels:
+    app: todo
+spec:
+  accessModes:
+    - ReadWriteOnce          # prefer RWO (see the deck)
+  resources:
+    requests:
+      storage: 1Gi
+  # storageClassName: longhorn   # workshop cluster: Longhorn; omit -> default class

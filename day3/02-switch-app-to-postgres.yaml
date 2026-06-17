@@ -1,0 +1,25 @@
+# Block 6 — switch the app from SQLite to Postgres WITHOUT changing the image.
+# Only two values change (DB_DRIVER + DATABASE_URL), injected via ConfigMap/Secret.
+# Apply, then:  kubectl rollout restart -n student-NN deploy/app
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: todo
+data:
+  COMPANY_NAME: "Workshop"
+  THEME: "navy"
+  LOG_LEVEL: "info"
+  DB_DRIVER: "postgres"          # <- changed
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  labels:
+    app: todo
+type: Opaque
+stringData:
+  AUTH_PASSWORD: "lab-secret"
+  DATABASE_URL: "postgres://todo:todo@db:5432/todo?sslmode=disable"   # <- added
