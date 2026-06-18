@@ -36,8 +36,12 @@ metadata:
     app: todo
 spec:
   replicas: 1
-  # strategy:        # REMOVED — no mounted volume, multiple pods can run simultaneously
-  #   type: Recreate
+  strategy:        
+    # type: Recreate # changed back to rolling updates no mounted volume, multiple pods can run simultaneously
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   selector:
     matchLabels:
       app: todo
