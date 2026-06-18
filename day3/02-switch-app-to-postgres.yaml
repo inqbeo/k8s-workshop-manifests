@@ -37,11 +37,7 @@ metadata:
 spec:
   replicas: 1
   strategy:        
-    # type: Recreate # changed back to rolling updates no mounted volume, multiple pods can run simultaneously
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
+    type: Recreate # still needed in order to tear down the yet existing pod with pvc mounted...
   selector:
     matchLabels:
       app: todo
