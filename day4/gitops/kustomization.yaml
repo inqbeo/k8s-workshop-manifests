@@ -3,6 +3,10 @@
 # and a ConfigMap built from values.yaml that the HelmRelease reads.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# Pin every generated/applied object to your namespace. Flux's multi-tenant Kustomization
+# impersonates the "flux" ServiceAccount in your namespace, so this must match it.
+# The lab substitutes "studentNN" with your real namespace (sed), like values.yaml.
+namespace: studentNN
 resources:
   - ocirepository.yaml
   - release.yaml
