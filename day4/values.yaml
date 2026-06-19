@@ -1,0 +1,39 @@
+# Day 4 / Lab 14 — values for the published "todo" chart
+# (oci://ghcr.io/inqbeo/charts/todo). The lab guide writes this with YOUR namespace
+# filled in; this committed copy uses the studentNN placeholder (the guide seds it).
+#
+# In Lab 16 this same file moves into your Gitea repo and Flux renders the chart with it.
+replicaCount: 1
+
+app:
+  companyName: "Workshop"
+  theme: navy                          # Lab 14 keeps yesterday's theme; change it to see upgrades
+  auth:
+    password: "lab-secret"             # fixed, so login stays admin/lab-secret when the DB is swapped
+                                       #   (ignored once a DB already holds a credential — it's frozen there)
+
+database:
+  type: postgres
+  postgres:
+    mode: external
+    external:
+      # A Secret holding a ready-to-use connection string under the `uri` key.
+      #  - Lab 14: you create it by hand for the Day-3 Postgres (db:5432).
+      #  - Lab 15: switch this to cnpg's auto-made `db-app` Secret (it ships a `uri`).
+      existingSecret: todo-db-uri
+      uriKey: uri
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  hosts:
+    - host: app-studentNN.k8s-workshop.inqbeo.academy
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: app-tls
+      hosts:
+        - app-studentNN.k8s-workshop.inqbeo.academy

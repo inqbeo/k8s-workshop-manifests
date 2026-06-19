@@ -14,8 +14,10 @@ database with the **CloudNativePG** operator, and roll it out with **GitOps**.
 |------|----:|--------------|
 | `kustomize/base/` | 13 | The app as a Kustomize **base**: `deployment.yaml`, `service.yaml`, and a `configMapGenerator` for `app-config` (hash-suffixed). |
 | `kustomize/overlays/prod/` | 13 | A **prod overlay**: a `replicas-3.yaml` strategic-merge patch + a `configMapGenerator` `behavior: merge` (COMPANY_NAME/THEME). Render with `kubectl kustomize`, apply with `kubectl apply -k`. |
+| `values.yaml` | 14 | Helm values for the `todo` chart: external Postgres (via a `uri` Secret), ingress + host + cert. In Lab 16 this file moves into your Gitea repo for Flux. |
 | `01-pg-cluster.yaml` | 15 | A **CloudNativePG `Cluster`** (`db`, 3 instances) → primary + 2 replicas, the `db-rw` Service and the `db-app` Secret (with a ready-to-use `uri`). |
-| `02-switch-app-to-cnpg.yaml` | 15 | Re-point the app's `DATABASE_URL` at cnpg's `db-rw` by reading the `uri` key from the `db-app` Secret. |
+| `02-seed-cnpg-job.yaml` | 15 | A **Job** that re-seeds the new cnpg database with demo TODOs (reads the `db-app` Secret, talks to `db-rw`). |
+| `02-switch-app-to-cnpg.yaml` | 15 | *Deprecated / reference only* — the raw-manifest form of the DB switch. The lab switches the app with `helm upgrade` instead. |
 
 ## Not in this folder (by design)
 

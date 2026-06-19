@@ -1,3 +1,8 @@
+# DEPRECATED / reference only. In the lab the app is a Helm release, so we switch it
+# to cnpg with `helm upgrade … --reuse-values --set
+# database.postgres.external.existingSecret=db-app` — NOT by applying this Deployment.
+# Kept only to show the equivalent raw-manifest form.
+#
 # Day 4 / Lab 15 — point the app at the HA database. cnpg put a ready-to-use
 # connection string in the db-app Secret's `uri` key; we feed that to the app as
 # DATABASE_URL. An explicit `env` entry wins over the same key coming in via

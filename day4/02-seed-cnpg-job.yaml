@@ -1,0 +1,54 @@
+# Day 4 / Lab 15 — re-seed the NEW cnpg database with the demo TODOs.
+# Same idea as the Day-3 seed Job, but it reads cnpg's auto-generated db-app
+# Secret (username/password/dbname) and talks to the read-write Service db-rw.
+# Run it AFTER the app has been switched (via helm) to the cnpg database.
+#
+#   kubectl apply -n <your-namespace> -f day4/02-seed-cnpg-job.yaml
+#   kubectl logs  -n <your-namespace> job/seed-todos-cnpg
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-todos-cnpg
+  labels:
+    app: todo
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: todo-seed
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: postgres:16-alpine
+          env:
+            - name: PGHOST
+              value: db-rw                      # cnpg read-write Service (→ current primary)
+            - name: PGUSER
+              valueFrom: { secretKeyRef: { name: db-app, key: username } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: db-app, key: password } }
+            - name: PGDATABASE
+              valueFrom: { secretKeyRef: { name: db-app, key: dbname } }
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "Waiting for the app to create the 'todos' table ..."
+              until psql -tAc "SELECT to_regclass('public.todos')" | grep -q '^todos$'; do
+                echo "  …not there yet, retrying in 2s"; sleep 2
+              done
+              echo "Seeding demo TODOs into the cnpg database at $PGHOST ..."
+              psql -v ON_ERROR_STOP=1 <<'SQL'
+              INSERT INTO todos (title, done) VALUES
+                ('Welcome to the HA database',                    false),
+                ('Run Postgres as a cnpg Cluster',                true),
+                ('Switch the app with one helm upgrade',          true),
+                ('Ship it all via GitOps',                        false),
+                ('Survive a primary failover',                    false),
+                ('Manage it in Rancher',                          false);
+              SQL
+              echo "Done. The table now holds:"
+              psql -tAc "SELECT count(*) || ' todos' FROM todos;"
