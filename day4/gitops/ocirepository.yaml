@@ -1,0 +1,10 @@
+# Day 4 / Lab 16 — Flux source for the Helm chart (pulled from the OCI registry).
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: todo-chart
+spec:
+  interval: 5m
+  url: oci://ghcr.io/inqbeo/charts/todo
+  ref:
+    tag: "0.1.2"

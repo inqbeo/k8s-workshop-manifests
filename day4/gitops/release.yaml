@@ -1,0 +1,15 @@
+# Day 4 / Lab 16 — the app as a Flux HelmRelease: the OCI chart, rendered with the
+# values.yaml from this same repo (via the todo-values ConfigMap generated below).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: todo
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: todo-chart
+  valuesFrom:
+    - kind: ConfigMap
+      name: todo-values
+      valuesKey: values.yaml
