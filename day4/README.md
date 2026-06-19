@@ -18,7 +18,7 @@ database with the **CloudNativePG** operator, and roll it out with **GitOps**.
 | `01-pg-cluster.yaml` | 15 | A **CloudNativePG `Cluster`** (`db`, 3 instances) → primary + 2 replicas, the `db-rw` Service and the `db-app` Secret (with a ready-to-use `uri`). |
 | `02-seed-cnpg-job.yaml` | 15 | A **Job** that re-seeds the new cnpg database with demo TODOs (reads the `db-app` Secret, talks to `db-rw`). |
 | `02-switch-app-to-cnpg.yaml` | 15 | *Deprecated / reference only* — the raw-manifest form of the DB switch. The lab switches the app with `helm upgrade` instead. |
-| `gitops/` | 16 | The files you copy into your **Gitea** repo for Flux: `ocirepository.yaml` (chart source), `release.yaml` (HelmRelease using `values.yaml`), `kustomization.yaml` (ties them + the cnpg Cluster together). |
+| `gitops/` | 16 | The whole desired state for your **Gitea** repo — copy it in one shot (`cp gitops/* .`) alongside your own `values.yaml`: `cnpg-cluster.yaml` (the HA database, same Cluster as `01-pg-cluster.yaml`), `ocirepository.yaml` (chart source), `release.yaml` (HelmRelease using `values.yaml`), `kustomization.yaml` (ties them together; `values.yaml` → hash-suffixed `todo-values` ConfigMap), and `kustomizeconfig.yaml` (nameReference so the hash is rewritten into the HelmRelease's `valuesFrom` → editing values auto-triggers a Helm upgrade). |
 
 ## Not in this folder (by design)
 

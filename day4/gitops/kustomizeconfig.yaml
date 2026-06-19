@@ -1,0 +1,16 @@
+# Day 4 / Lab 16 — Kustomize name-reference config.
+#
+# The configMapGenerator produces a hash-suffixed ConfigMap (e.g. "todo-values-9f7c2k").
+# Kustomize already rewrites references to it inside built-in types, but a Flux
+# HelmRelease is a CRD, so Kustomize doesn't know that its spec.valuesFrom[].name is a
+# ConfigMap reference. This config teaches it: now editing values.yaml gives a new hash,
+# a new ConfigMap name, and that new name is also written into the HelmRelease — so Flux
+# sees a changed HelmRelease and rolls out a Helm upgrade. (Same trick as Lab 13's
+# auto-rollout, but propagated across the GitOps boundary.)
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - kind: HelmRelease
+        group: helm.toolkit.fluxcd.io
+        path: spec/valuesFrom/name

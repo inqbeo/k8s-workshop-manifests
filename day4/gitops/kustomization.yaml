@@ -11,5 +11,8 @@ configMapGenerator:
   - name: todo-values
     files:
       - values.yaml
-generatorOptions:
-  disableNameSuffixHash: true     # keep the name "todo-values" stable so the HelmRelease's valuesFrom resolves
+# Teach Kustomize that HelmRelease.spec.valuesFrom[].name points at a ConfigMap, so the
+# hash suffix on the generated "todo-values-<hash>" is rewritten into the HelmRelease too.
+# Editing values.yaml -> new hash -> new name -> HelmRelease changes -> Flux upgrades.
+configurations:
+  - kustomizeconfig.yaml
