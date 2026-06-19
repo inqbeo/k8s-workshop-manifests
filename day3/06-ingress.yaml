@@ -16,8 +16,12 @@ metadata:
     # cert-manager watches this and issues a Let's Encrypt cert into app-tls
     # (HTTP-01 challenge). The "how" is Day 4 — today it just happens.
     cert-manager.io/cluster-issuer: letsencrypt
-    # Traefik: send plain http to https automatically.
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    # Serve on BOTH entrypoints: the redirect-https middleware (below) bounces
+    # plain http (web) to https, and websecure serves the app over TLS. Listing
+    # only "websecure" would 404 every http request (no router on port 80).
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # Traefik: send plain http to https automatically (shared Middleware in
+    # kube-system, provided by the platform).
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-redirect-https@kubernetescrd
 spec:
   ingressClassName: traefik
