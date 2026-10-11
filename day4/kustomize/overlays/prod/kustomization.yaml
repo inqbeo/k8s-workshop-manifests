@@ -1,5 +1,9 @@
 # Day 4 / Lab 13 — prod overlay. The whole "logic", and there's barely any:
-# reference the base, patch replicas to 3, and merge two values into app-config.
+# reference the base, patch replicas to 3 (strategic merge), patch the real
+# hostname into the Ingress (JSON patch), and merge two values into app-config.
+#
+#   >>> the lab guide's sed fills YOUR namespace into the host (e.g. student-07) <<<
+#   sed -i "s/studentNN/<your-namespace>/" kustomize/overlays/prod/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -7,7 +11,20 @@ resources:
   - ../../base
 
 patches:
-  - path: replicas-3.yaml          # strategic-merge
+  # 1) strategic-merge patch: a partial Deployment, merged onto the base by name
+  - path: replicas-3.yaml
+  # 2) JSON patch (RFC 6902): operations on paths — the tool for list elements
+  #    (/spec/rules/0/host) and anything a merge can't express (remove, move, …)
+  - target:
+      kind: Ingress
+      name: app
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: app-studentNN.k8s-workshop.inqbeo.academy
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: app-studentNN.k8s-workshop.inqbeo.academy
 
 configMapGenerator:
   - name: app-config

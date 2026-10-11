@@ -16,6 +16,8 @@ All manifests are namespace-agnostic — apply them into your own namespace with
 | `05-httproute.yaml` | 4 | **Variant A — Gateway API (2/2):** an HTTPRoute attaching the app Service to **your** Gateway. Apply after `05-gateway.yaml`. |
 | `06-ingress.yaml` | 4 | **Variant B — classic Ingress:** the same goal via a single Ingress (TLS via cert-manager). |
 | `07-networkpolicy.yaml` | 5 | A **NetworkPolicy**: only the app Pods may reach the DB on 5432. |
+| `08-servicemonitor.yaml` | 6b | A **ServiceMonitor**: the platform's Prometheus scrapes the app's `/metrics` (selects Service `app` by label, port name `http`). |
+| `09-prometheusrule.yaml` | 6b | *Going further* — a **PrometheusRule**: `TodoDatabaseDown` (db_up == 0 for 2 min) and a 5 % error-rate alert. |
 
 > The HA database (CloudNativePG operator), Kustomize/Helm, GitOps and Rancher
 > are **Day 4**.

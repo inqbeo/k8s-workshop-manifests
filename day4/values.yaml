@@ -37,3 +37,10 @@ ingress:
     - secretName: app-tls
       hosts:
         - app-studentNN.k8s-workshop.inqbeo.academy
+
+# Day 3's ServiceMonitor, now as one chart value: the platform's Prometheus keeps
+# scraping the app (http_requests_total, todos, db_up) after the move to Helm —
+# and via GitOps in Lab 16. (Needs the Prometheus Operator; it's installed.)
+serviceMonitor:
+  enabled: true
+  interval: 15s

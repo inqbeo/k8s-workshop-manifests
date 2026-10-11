@@ -3,7 +3,7 @@
 # DB Pods and allows ingress ONLY from Pods labelled app=todo, on port 5432.
 # Everything else (e.g. a debug Pod) is then blocked from the DB.
 #
-# NOTE: NetworkPolicies are enforced by the CNI — our cluster runs Cilium, so
+# NOTE: NetworkPolicies are enforced by the CNI — our cluster runs Canal (RKE2 default), so
 # they take effect. On a CNI that ignores them, this would be a no-op.
 #
 #   kubectl apply -n student-NN -f day3/07-networkpolicy.yaml

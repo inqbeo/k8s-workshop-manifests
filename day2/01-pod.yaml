@@ -12,6 +12,6 @@ metadata:
 spec:
   containers:
     - name: app
-      image: ghcr.io/inqbeo/containerization-demo-webapp:0.1.2
+      image: ghcr.io/inqbeo/containerization-demo-webapp:0.3.0
       ports:
         - containerPort: 8080

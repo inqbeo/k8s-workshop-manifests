@@ -1,0 +1,35 @@
+# Block 6b (going further) — an alert on a SYMPTOM: the app can't reach its DB.
+# db_up is a gauge the app reports at every scrape (1 = ping ok, 0 = not).
+# "for: 2m" avoids flapping on a single failed scrape. The rule lands in the
+# platform's Prometheus; a firing alert shows up in Alertmanager (home.<domain>).
+#
+#   kubectl apply -n student-NN -f day3/09-prometheusrule.yaml
+#   kubectl scale statefulset/db --replicas=0      # → db_up 0 → fires after 2 min
+#   kubectl scale statefulset/db --replicas=1      # → resolves
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: todo-alerts
+  labels:
+    app: todo
+spec:
+  groups:
+    - name: todo
+      rules:
+        - alert: TodoDatabaseDown
+          expr: db_up == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "todo app in {{ $labels.namespace }} cannot reach its database"
+            description: "db_up has been 0 for 2 minutes (pod {{ $labels.pod }})."
+        - alert: TodoHighErrorRate
+          expr: >
+            sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m]))
+              / sum by (namespace) (rate(http_requests_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "more than 5 % of todo requests fail in {{ $labels.namespace }}"

@@ -1,0 +1,22 @@
+# Block 6b — make YOUR app's metrics visible to the cluster's Prometheus.
+# The todo app serves Prometheus metrics on GET /metrics (http_requests_total,
+# todos, db_up, …). The platform's Prometheus Operator (rancher-monitoring)
+# watches ServiceMonitor objects in every namespace and rewrites its scrape
+# config: select the Service by label, scrape every Pod behind it.
+#
+#   kubectl apply -n student-NN -f day3/08-servicemonitor.yaml
+#   # Prometheus UI → Status → Targets → serviceMonitor/student-NN/app/0 → 4 Pods UP
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  selector:
+    matchLabels:
+      app: todo             # the Day-2 Service "app" carries this label
+  endpoints:
+    - port: http            # the Service's port NAME (not the number!)
+      path: /metrics
+      interval: 15s

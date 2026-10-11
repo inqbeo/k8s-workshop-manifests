@@ -1,0 +1,31 @@
+# Day 4 / Lab 13 — Kustomize base: the public entry (same shape as day3/06-ingress.yaml).
+# The host is deliberately GENERIC: a base must not know which environment it lands
+# in. The prod overlay replaces it with a JSON patch (RFC 6902) — the second kind of
+# patch next to the strategic-merge one in replicas-3.yaml.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+  labels:
+    app: todo
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-redirect-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - app.example.invalid        # <- patched per environment (overlays/prod)
+      secretName: app-tls
+  rules:
+    - host: app.example.invalid      # <- patched per environment (overlays/prod)
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
