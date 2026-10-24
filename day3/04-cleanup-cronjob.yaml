@@ -1,4 +1,4 @@
-# Block 2 — a CronJob that keeps the list tidy: every 5 minutes it deletes the
+# Day 3 / Lab 9 — a CronJob that keeps the list tidy: every 5 minutes it deletes the
 # TODOs that are marked done. A CronJob WRAPS a Job and creates one on each tick.
 #
 #   kubectl apply  -n student-NN -f day3/04-cleanup-cronjob.yaml

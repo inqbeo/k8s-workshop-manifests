@@ -1,4 +1,4 @@
-# Block 6b (going further) — an alert on a SYMPTOM: the app can't reach its DB.
+# Day 3 / Lab 12b (going further) — an alert on a SYMPTOM: the app can't reach its DB.
 # db_up is a gauge the app reports at every scrape (1 = ping ok, 0 = not).
 # "for: 2m" avoids flapping on a single failed scrape. The rule lands in the
 # platform's Prometheus; a firing alert shows up in Alertmanager (home.<domain>).

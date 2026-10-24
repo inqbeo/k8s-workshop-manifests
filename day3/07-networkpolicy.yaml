@@ -1,4 +1,4 @@
-# Block 5 — lock down the DB: only the app may reach Postgres.
+# Day 3 / Lab 11 — lock down the DB: only the app may reach Postgres.
 # Default in Kubernetes is "everyone talks to everyone". This policy selects the
 # DB Pods and allows ingress ONLY from Pods labelled app=todo, on port 5432.
 # Everything else (e.g. a debug Pod) is then blocked from the DB.

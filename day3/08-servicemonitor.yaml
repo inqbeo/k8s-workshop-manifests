@@ -1,4 +1,4 @@
-# Block 6b — make YOUR app's metrics visible to the cluster's Prometheus.
+# Day 3 / Lab 12b — make YOUR app's metrics visible to the cluster's Prometheus.
 # The todo app serves Prometheus metrics on GET /metrics (http_requests_total,
 # todos, db_up, …). The platform's Prometheus Operator (rancher-monitoring)
 # watches ServiceMonitor objects in every namespace and rewrites its scrape

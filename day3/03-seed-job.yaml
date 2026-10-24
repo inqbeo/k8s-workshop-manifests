@@ -1,4 +1,4 @@
-# Block 2 — a Job that seeds the fresh Postgres DB with a few demo TODOs.
+# Day 3 / Lab 9 — a Job that seeds the fresh Postgres DB with a few demo TODOs.
 # A Job runs ONCE to completion (then shows Completed) — perfect for seeding.
 # It talks straight to the DB via the in-cluster Service `db:5432`.
 #

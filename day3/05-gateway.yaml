@@ -1,4 +1,4 @@
-# Day 3 / Block 4 — VARIANT A (Gateway API), part 1 of 2: YOUR Gateway.
+# Day 3 / Lab 10b — VARIANT A (Gateway API), part 1 of 2: YOUR Gateway.
 #
 # Each student runs their OWN Gateway in their own namespace. We do NOT attach to the
 # platform's central Gateway: its HTTPS cert only covers shared hosts (gateway./gitea./

@@ -6,6 +6,11 @@ metadata:
   name: todo
 spec:
   interval: 5m
+  # Flux starts the cnpg Cluster and this release together; until cnpg has created the
+  # db-app Secret the app can't start. Retry a failed first install instead of giving up.
+  install:
+    remediation:
+      retries: 3
   chartRef:
     kind: OCIRepository
     name: todo-chart

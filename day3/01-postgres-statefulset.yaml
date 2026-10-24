@@ -1,4 +1,4 @@
-# Block 6 — Postgres as a StatefulSet (stable identity + per-Pod storage).
+# Day 3 / Lab 9 — Postgres as a StatefulSet (stable identity + per-Pod storage).
 # Minimal, own manifest (NOT Bitnami). No real redundancy -> not production;
 # the clean way (CloudNativePG operator) is Day 4.
 apiVersion: v1

@@ -8,7 +8,8 @@ step by step across the course.
 day2/   Kubernetes basics — Pod, Deployment (+ probes), ConfigMap/Secret, PVC, Service & DNS
 day3/   Workload types (StatefulSet/DaemonSet/Jobs) + a real database, Ingress / Gateway API,
         certificates, high availability, network policies
-day4/   (coming) Kustomize / Helm, operators / CRDs (CloudNativePG), GitOps, Rancher
+day4/   Kustomize, Helm (published OCI chart), an operator / CRDs (CloudNativePG HA Postgres),
+        GitOps with Flux + Gitea
 ```
 
 All manifests are plain YAML and **namespace-agnostic** — apply them into your

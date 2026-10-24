@@ -1,4 +1,4 @@
-# Block 4 — VARIANT B (classic Ingress): the same goal, the other shape.
+# Day 3 / Lab 10a — VARIANT B (classic Ingress): the same goal, the other shape.
 # Pick ONE variant in the lab (the trainer says which). Both work in our cluster
 # (Traefik serves Ingress AND Gateway API on the same IP).
 #

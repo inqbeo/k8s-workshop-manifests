@@ -12,6 +12,12 @@ resources:
   - service.yaml
   - ingress.yaml            # generic host — the overlay patches the real one in (JSON patch)
 
+# Generated ConfigMaps carry no labels by default; tag them like everything else so
+# label-based clean-ups (`kubectl delete … -l app=todo`, Lab 14) catch them too.
+generatorOptions:
+  labels:
+    app: todo
+
 configMapGenerator:
   - name: app-config
     literals:

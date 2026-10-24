@@ -1,4 +1,4 @@
-# Block 4 — ReplicaSet -> Deployment
+# Day 2 / Lab 6 — ReplicaSet -> Deployment
 # Minimal Deployment (config still inline). Rolling update by changing
 # COMPANY_NAME / THEME below, then: kubectl apply -n student-NN -f 02-deployment.yaml
 apiVersion: apps/v1

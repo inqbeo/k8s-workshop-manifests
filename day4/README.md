@@ -25,9 +25,11 @@ database with the **CloudNativePG** operator, and roll it out with **GitOps**.
 - **The Helm chart** (Lab 14) lives on an OCI registry: `oci://ghcr.io/inqbeo/charts/todo`
   — you install it, you don't build it. (Its source is in the `todo-app/chart/` of the
   course repo.)
-- **GitOps** (Lab 16): the chart stays on OCI, and **your `values.yaml`** lives in your
-  per-student **Gitea** repo `todo-gitops`; Flux's `OCIRepository` / `GitRepository` /
-  `HelmRelease` are pre-provisioned for your namespace.
+- **The Flux bootstrap** (Lab 16): your per-student **Gitea** repo `todo-gitops` starts
+  empty (README only). You fill it from `gitops/` + your `values.yaml`, then create the
+  two pointers into it yourself with the `flux` CLI — a `GitRepository` (plus its
+  credentials Secret) and a Flux `Kustomization`, all in **your** namespace. Only the
+  Flux controllers and the `flux` ServiceAccount in your namespace are pre-provisioned.
 
 ## Typical flow
 
@@ -39,14 +41,30 @@ sed -i "s/studentNN/$NS/" kustomize/overlays/prod/kustomization.yaml   # your ho
 kubectl kustomize kustomize/overlays/prod      # render (no apply)
 kubectl apply -k kustomize/overlays/prod -n $NS
 
-# Lab 14 — Helm (chart from OCI; uninstall before Lab 15 so cnpg owns the DB)
-helm install todo oci://ghcr.io/inqbeo/charts/todo --version 0.3.0 -n $NS
-helm uninstall todo -n $NS
+# Lab 14 — Helm (chart from OCI, pointed at the Day-3 Postgres; keep the release running)
+kubectl -n $NS delete deploy,svc,ingress,httproute,gateway,configmap,servicemonitor \
+  -l app=todo --ignore-not-found                # clean slate — the db (app=todo-db) stays
+cp values.yaml ~/values.yaml && sed -i "s/studentNN/$NS/" ~/values.yaml
+kubectl -n $NS create secret generic todo-db-uri \
+  --from-literal=uri='postgres://todo:todo@db:5432/todo?sslmode=disable'
+helm install todo oci://ghcr.io/inqbeo/charts/todo --version 0.3.0 -n $NS -f ~/values.yaml
+#   (the Day-3 NetworkPolicy only admits app=todo — the lab extends it by JSON patch)
 
-# Lab 15 — HA Postgres via cnpg
+# Lab 15 — HA Postgres via cnpg, then one helm upgrade
 kubectl apply -n $NS -f 01-pg-cluster.yaml
-kubectl apply -n $NS -f 02-switch-app-to-cnpg.yaml
-kubectl -n $NS rollout restart deploy/app
+sed -i 's/existingSecret: todo-db-uri/existingSecret: db-app/' ~/values.yaml
+helm upgrade todo oci://ghcr.io/inqbeo/charts/todo --version 0.3.0 -n $NS -f ~/values.yaml
+kubectl apply -n $NS -f 02-seed-cnpg-job.yaml   # re-seed the new (empty) database
+
+# Lab 16 — GitOps: tear down by hand, let Flux rebuild everything from Git
+helm uninstall todo -n $NS && kubectl -n $NS delete cluster.postgresql.cnpg.io db
+cd ~/todo-gitops && cp ~/values.yaml . && cp ~/manifests/day4/gitops/* .
+sed -i "s/studentNN/$NS/" kustomization.yaml && git add -A && git commit -m app && git push
+flux create secret git todo-gitops-auth -n $NS --url=<repo-url> --username=$NS --password='<pw>'
+flux create source git todo -n $NS --url=<repo-url> --branch=main \
+  --secret-ref=todo-gitops-auth --interval=1m
+flux create kustomization todo -n $NS --target-namespace=$NS \
+  --source=GitRepository/todo --path=./ --prune=true --service-account=flux --interval=1m
 ```
 
 > The cnpg operator, cert-manager, Traefik, Longhorn and Flux are installed

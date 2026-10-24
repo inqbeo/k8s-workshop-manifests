@@ -1,4 +1,4 @@
-# Block 5 — the "full" Deployment: config & secret via envFrom, PVC for /data, probes.
+# Day 2 / Lab 7 — the "full" Deployment: config & secret via envFrom, PVC for /data, probes.
 # This supersedes 02-deployment.yaml.
 apiVersion: apps/v1
 kind: Deployment

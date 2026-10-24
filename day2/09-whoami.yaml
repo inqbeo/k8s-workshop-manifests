@@ -1,4 +1,4 @@
-# Block 6 — a stateless app that actually scales, so a Service can load-balance.
+# Day 2 / Lab 8 — a stateless app that actually scales, so a Service can load-balance.
 # traefik/whoami answers every request with the responding Pod's hostname, so
 # round-robin across replicas is visible. Our todo app can't do this: it has one
 # RWO PVC (two Pods can't share it), and giving each replica its own volume would
