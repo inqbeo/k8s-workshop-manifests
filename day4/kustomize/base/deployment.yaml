@@ -19,19 +19,22 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.3.0
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.4.0
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 8081    # /metrics (since 0.4.0) — scraped via the Service port "metrics"
           envFrom:
             - configMapRef:
                 name: app-config       # generated below; the name reference is rewritten to app-config-<hash>
             - secretRef:
                 name: app-secret       # pre-existing from Day 2/3 (not managed by Kustomize)
           livenessProbe:
-            httpGet: { path: /healthz, port: 8080 }
+            httpGet: { path: /livez, port: 8080 }    # "alive?" — never depends on the DB
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /healthz, port: 8080 }
+            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?" — pings the DB
             initialDelaySeconds: 3
             periodSeconds: 5

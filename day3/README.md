@@ -16,8 +16,9 @@ All manifests are namespace-agnostic — apply them into your own namespace with
 | `05-httproute.yaml` | 10b | **Variant A — Gateway API (2/2):** an HTTPRoute attaching the app Service to **your** Gateway. Apply after `05-gateway.yaml`. |
 | `06-ingress.yaml` | 10a | **Variant B — classic Ingress:** the same goal via a single Ingress (TLS via cert-manager). |
 | `07-networkpolicy.yaml` | 11 | A **NetworkPolicy**: only the app Pods may reach the DB on 5432. |
-| `08-servicemonitor.yaml` | 12b | A **ServiceMonitor**: the platform's Prometheus scrapes the app's `/metrics` (selects Service `app` by label, port name `http`). |
-| `09-prometheusrule.yaml` | 12b | *Going further* — a **PrometheusRule**: `TodoDatabaseDown` (db_up == 0 for 2 min) and a 5 % error-rate alert. |
+| `08-metrics-port.yaml` | 12b | The Service `app` gets a second, cluster-internal port **`metrics`** (8081) — since app 0.4.0 `/metrics` lives on its own listener, never on the public port. |
+| `09-servicemonitor.yaml` | 12b | A **ServiceMonitor**: the platform's Prometheus scrapes the app's `/metrics` (selects Service `app` by label, port name `metrics`). |
+| `10-prometheusrule.yaml` | 12b | *Going further* — a **PrometheusRule**: `TodoDatabaseDown` (db_up == 0 for 2 min, one alert per namespace) and a 5 % error-rate alert; both name the namespace. |
 
 > The HA database (CloudNativePG operator), Kustomize/Helm and GitOps are
 > **Day 4**.
@@ -41,6 +42,7 @@ kubectl apply -n $NS -f 05-httproute.yaml         # Variant A (2/2) — the HTTP
 kubectl apply -n $NS -f 07-networkpolicy.yaml
 
 # Lab 12b — metrics (and, going further, alerts)
-kubectl apply -n $NS -f 08-servicemonitor.yaml
-kubectl apply -n $NS -f 09-prometheusrule.yaml
+kubectl apply -n $NS -f 08-metrics-port.yaml
+kubectl apply -n $NS -f 09-servicemonitor.yaml
+kubectl apply -n $NS -f 10-prometheusrule.yaml
 ```

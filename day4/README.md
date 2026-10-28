@@ -47,13 +47,13 @@ kubectl -n $NS delete deploy,svc,ingress,httproute,gateway,configmap,servicemoni
 cp values.yaml ~/values.yaml && sed -i "s/studentNN/$NS/" ~/values.yaml
 kubectl -n $NS create secret generic todo-db-uri \
   --from-literal=uri='postgres://todo:todo@db:5432/todo?sslmode=disable'
-helm install todo oci://ghcr.io/inqbeo/charts/todo --version 0.3.0 -n $NS -f ~/values.yaml
+helm install todo oci://ghcr.io/inqbeo/charts/todo --version 0.4.0 -n $NS -f ~/values.yaml
 #   (the Day-3 NetworkPolicy only admits app=todo — the lab extends it by JSON patch)
 
 # Lab 15 — HA Postgres via cnpg, then one helm upgrade
 kubectl apply -n $NS -f 01-pg-cluster.yaml
 sed -i 's/existingSecret: todo-db-uri/existingSecret: db-app/' ~/values.yaml
-helm upgrade todo oci://ghcr.io/inqbeo/charts/todo --version 0.3.0 -n $NS -f ~/values.yaml
+helm upgrade todo oci://ghcr.io/inqbeo/charts/todo --version 0.4.0 -n $NS -f ~/values.yaml
 kubectl apply -n $NS -f 02-seed-cnpg-job.yaml   # re-seed the new (empty) database
 
 # Lab 16 — GitOps: tear down by hand, let Flux rebuild everything from Git

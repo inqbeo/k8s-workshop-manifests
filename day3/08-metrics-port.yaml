@@ -1,0 +1,32 @@
+# Day 3 / Lab 12b — open the metrics port on the Service.
+# Since app 0.4.0 the todo app serves GET /metrics on a SEPARATE listener (:8081),
+# not on the app port (:8080) — so metrics never leak through the public Ingress /
+# HTTPRoute (those point at the port NAME "http"). The Day-2 Service only knows
+# 8080; this adds a second, cluster-internal port "metrics" that the ServiceMonitor
+# (09-servicemonitor.yaml) will reference by name.
+#
+# The Deployment is NOT touched: containerPort entries are documentation, not a
+# firewall — the Service's targetPort reaches 8081 regardless. (Lab 13 / the Helm
+# chart declare the port properly.) Re-applying the Deployment here would also
+# reset your 4 replicas from Lab 12.
+#
+#   kubectl apply -n student-NN -f day3/08-metrics-port.yaml
+#   kubectl get svc app                      # PORT(S): 8080/TCP,8081/TCP
+#   kubectl exec -it netshoot -- curl -s http://app:8081/metrics | grep db_up
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: todo
+spec:
+  type: ClusterIP
+  selector:
+    app: todo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: metrics          # <- added: /metrics, reachable in-cluster only
+      port: 8081
+      targetPort: 8081

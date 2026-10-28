@@ -12,4 +12,7 @@ spec:
   ports:
     - name: http
       port: 8080
-      targetPort: 8080
+      targetPort: http
+    - name: metrics          # cluster-internal only: the Ingress points at "http"
+      port: 8081
+      targetPort: metrics
