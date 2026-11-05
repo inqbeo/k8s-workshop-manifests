@@ -1,4 +1,4 @@
-# Day 2 / Lab 7 — Configuration as a cluster object
+# Day 2 / Lab 2.4: Configuration as a cluster object
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,4 +9,4 @@ data:
   COMPANY_NAME: "Workshop"
   THEME: "coral"          # coral | navy | dark
   LOG_LEVEL: "info"
-  DB_DRIVER: "sqlite"     # switched to "postgres" on Day 3 (Lab 9)
+  DB_DRIVER: "sqlite"     # switched to "postgres" on Day 3 (Lab 3.1)

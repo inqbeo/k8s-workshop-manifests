@@ -5,14 +5,14 @@ They build up the same demo app (`ghcr.io/inqbeo/containerization-demo-webapp`)
 step by step across the course.
 
 ```
-day2/   Kubernetes basics — Pod, Deployment (+ probes), ConfigMap/Secret, PVC, Service & DNS
+day2/   Kubernetes basics: Pod, Deployment (+ probes), ConfigMap/Secret, PVC, Service & DNS
 day3/   Workload types (StatefulSet/DaemonSet/Jobs) + a real database, Ingress / Gateway API,
-        certificates, high availability, network policies
+        certificates, high availability, network policies, metrics (app + database)
 day4/   Kustomize, Helm (published OCI chart), an operator / CRDs (CloudNativePG HA Postgres),
         GitOps with Flux + Gitea
 ```
 
-All manifests are plain YAML and **namespace-agnostic** — apply them into your
+All manifests are plain YAML and **namespace-agnostic**: apply them into your
 own namespace with `kubectl apply -n <your-namespace> -f <file>`. See each day's
 `README.md` for the order and a walkthrough.
 

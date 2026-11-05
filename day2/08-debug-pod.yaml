@@ -1,4 +1,4 @@
-# Day 2 / Lab 8 — a throwaway debug pod to test service discovery from inside the cluster:
+# Day 2 / Lab 2.5: a throwaway debug pod to test service discovery from inside the cluster:
 #   kubectl exec -n student-NN -it netshoot -- curl http://app:8080/healthz
 apiVersion: v1
 kind: Pod

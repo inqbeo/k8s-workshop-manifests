@@ -1,8 +1,8 @@
-# Day 2 / Lab 8 — a stateless app that actually scales, so a Service can load-balance.
+# Day 2 / Lab 2.5: a stateless app that actually scales, so a Service can load-balance.
 # traefik/whoami answers every request with the responding Pod's hostname, so
 # round-robin across replicas is visible. Our todo app can't do this: it has one
 # RWO PVC (two Pods can't share it), and giving each replica its own volume would
-# mean each one has different data — nonsense for a single app. State belongs in a
+# mean each one has different data, nonsense for a single app. State belongs in a
 # shared database (Day 3); stateless apps like this are what you scale behind a Service.
 apiVersion: apps/v1
 kind: Deployment

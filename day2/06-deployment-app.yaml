@@ -1,4 +1,4 @@
-# Day 2 / Lab 7 — the "full" Deployment: config & secret via envFrom, PVC for /data, probes.
+# Day 2 / Lab 2.4: the "full" Deployment: config & secret via envFrom, PVC for /data, probes.
 # This supersedes 02-deployment.yaml.
 apiVersion: apps/v1
 kind: Deployment
@@ -19,13 +19,13 @@ spec:
       # The app runs as a non-root user; the Longhorn volume is mounted root-owned.
       # fsGroup makes the mounted volume group-owned by the app's GID so it can
       # write its SQLite file (without this the container crashes:
-      # "unable to open database file"). Deeper than today's scope — just know it's here.
+      # "unable to open database file"). Deeper than today's scope; just know it's here.
       securityContext:
         fsGroup: 10001
         fsGroupChangePolicy: OnRootMismatch   # optional: faster on large/already-correct volumes
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.4.0
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.6.0
           ports:
             - containerPort: 8080
           envFrom:
@@ -37,11 +37,11 @@ spec:
             - name: data
               mountPath: /data
           livenessProbe:
-            httpGet: { path: /livez, port: 8080 }    # "alive?" — never depends on the DB
+            httpGet: { path: /livez, port: 8080 }    # "alive?": never depends on the DB
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?" — pings the DB
+            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?": pings the DB
             initialDelaySeconds: 3
             periodSeconds: 5
       volumes:

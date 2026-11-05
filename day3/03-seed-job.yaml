@@ -1,5 +1,5 @@
-# Day 3 / Lab 9 — a Job that seeds the fresh Postgres DB with a few demo TODOs.
-# A Job runs ONCE to completion (then shows Completed) — perfect for seeding.
+# Day 3 / Lab 3.1: a Job that seeds the fresh Postgres DB with a few demo TODOs.
+# A Job runs ONCE to completion (then shows Completed): perfect for seeding.
 # It talks straight to the DB via the in-cluster Service `db:5432`.
 #
 #   kubectl apply -n student-NN -f day3/03-seed-job.yaml

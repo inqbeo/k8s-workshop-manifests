@@ -1,4 +1,4 @@
-# Day 4 / Lab 15 — re-seed the NEW cnpg database with the demo TODOs.
+# Day 4 / Lab 4.3: re-seed the NEW cnpg database with the demo TODOs.
 # Same idea as the Day-3 seed Job, but it reads cnpg's auto-generated db-app
 # Secret (username/password/dbname) and talks to the read-write Service db-rw.
 # Run it AFTER the app has been switched (via helm) to the cnpg database.

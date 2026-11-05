@@ -1,4 +1,4 @@
-# Day 4 / Lab 16 — what the Flux Kustomization applies from your Git repo:
+# Day 4 / Lab 4.4: what the Flux Kustomization applies from your Git repo:
 # the OCIRepository (chart source), the HelmRelease (the app), the cnpg Cluster (the DB),
 # and a ConfigMap built from values.yaml that the HelmRelease reads.
 apiVersion: kustomize.config.k8s.io/v1beta1

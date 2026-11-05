@@ -1,10 +1,10 @@
-# Day 3 / Lab 12b (going further) — an alert on a SYMPTOM: the app can't reach its DB.
+# Day 3 / Lab 3.5 (going further): an alert on a SYMPTOM: the app can't reach its DB.
 # db_up is a gauge the app reports at every scrape (1 = ping ok, 0 = not).
 # "for: 2m" avoids flapping on a single failed scrape. The rule lands in the
 # platform's Prometheus; a firing alert shows up in Alertmanager (home.<domain>)
 # and in Rancher (your cluster -> Cluster Dashboard -> "Alerts" tab).
 # Prometheus adds the "namespace" label to every scraped sample, so {{ $labels.namespace }}
-# tells you WHOSE app is down — with 20 students on one cluster that matters.
+# tells you WHOSE app is down; with 20 students on one cluster that matters.
 #
 #   kubectl apply -n student-NN -f day3/10-prometheusrule.yaml
 #   kubectl scale statefulset/db --replicas=0      # → db_up 0 → fires after 2 min
@@ -20,7 +20,7 @@ spec:
     - name: todo
       rules:
         - alert: TodoDatabaseDown
-          # max by (namespace): ONE alert per namespace, not one per Pod — with 4
+          # max by (namespace): ONE alert per namespace, not one per Pod; with 4
           # replicas a plain "db_up == 0" would fire four times for the same DB.
           expr: max by (namespace) (db_up) == 0
           for: 2m
@@ -40,4 +40,4 @@ spec:
           annotations:
             summary: "[{{ $labels.namespace }}] more than 5 % of todo requests fail"
             message: "[{{ $labels.namespace }}] more than 5 % of todo requests fail (5xx ratio over 5 min)"
-            description: "Namespace {{ $labels.namespace }}: the 5xx share of http_requests_total exceeded 5 % for 5 minutes — the symptom users feel; check db_up for the cause."
+            description: "Namespace {{ $labels.namespace }}: the 5xx share of http_requests_total exceeded 5 % for 5 minutes. That is the symptom users feel; check db_up for the cause."

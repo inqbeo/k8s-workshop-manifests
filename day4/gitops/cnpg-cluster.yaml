@@ -1,5 +1,5 @@
-# Day 4 / Lab 16 — the HA Postgres Cluster, now part of the GitOps repo so Flux owns it.
-# Identical to day4/01-pg-cluster.yaml (Lab 15); copied here so a single `cp gitops/* .`
+# Day 4 / Lab 4.4: the HA Postgres Cluster, now part of the GitOps repo so Flux owns it.
+# Identical to day4/01-pg-cluster.yaml (Lab 4.3); copied here so a single `cp gitops/* .`
 # pulls the whole desired state into your Gitea repo. The cnpg operator turns this one
 # resource into a primary + two replicas, the db-rw Service and the db-app Secret.
 apiVersion: postgresql.cnpg.io/v1

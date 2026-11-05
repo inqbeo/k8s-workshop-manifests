@@ -1,4 +1,4 @@
-# Day 4 / Lab 13 — prod overlay. The whole "logic", and there's barely any:
+# Day 4 / Lab 4.1: prod overlay. The whole "logic", and there's barely any:
 # reference the base, patch replicas to 3 (strategic merge), patch the real
 # hostname into the Ingress (JSON patch), and merge two values into app-config.
 #
@@ -13,7 +13,7 @@ resources:
 patches:
   # 1) strategic-merge patch: a partial Deployment, merged onto the base by name
   - path: replicas-3.yaml
-  # 2) JSON patch (RFC 6902): operations on paths — the tool for list elements
+  # 2) JSON patch (RFC 6902): operations on paths, the tool for list elements
   #    (/spec/rules/0/host) and anything a merge can't express (remove, move, …)
   - target:
       kind: Ingress

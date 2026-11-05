@@ -1,4 +1,4 @@
-# Day 2 / Lab 6 — ReplicaSet -> Deployment
+# Day 2 / Lab 2.3: ReplicaSet -> Deployment
 # Minimal Deployment (config still inline). Rolling update by changing
 # COMPANY_NAME / THEME below, then: kubectl apply -n student-NN -f 02-deployment.yaml
 apiVersion: apps/v1
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.4.0
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.6.0
           ports:
             - containerPort: 8080
           env:
@@ -30,10 +30,10 @@ spec:
             - name: AUTH_PASSWORD
               value: "lab-secret"
           livenessProbe:
-            httpGet: { path: /livez, port: 8080 }    # "alive?" — never depends on the DB
+            httpGet: { path: /livez, port: 8080 }    # "alive?": never depends on the DB
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?" — pings the DB
+            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?": pings the DB
             initialDelaySeconds: 3
             periodSeconds: 5

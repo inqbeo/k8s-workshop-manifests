@@ -1,4 +1,4 @@
-# Day 4 / Lab 16 — Flux source for the Helm chart (pulled from the OCI registry).
+# Day 4 / Lab 4.4: Flux source for the Helm chart (pulled from the OCI registry).
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
@@ -7,4 +7,4 @@ spec:
   interval: 5m
   url: oci://ghcr.io/inqbeo/charts/todo
   ref:
-    tag: "0.4.0"
+    tag: "0.6.0"

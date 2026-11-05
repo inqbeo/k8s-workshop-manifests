@@ -1,0 +1,116 @@
+# Day 3 / Lab 3.5: database metrics with a postgres_exporter SIDECAR.
+# This is the StatefulSet from 01-postgres-statefulset.yaml (same name "db", same
+# volumeClaimTemplates, so re-applying it keeps the data) plus:
+#   (1) a second container "metrics" in the Pod: postgres_exporter talks to
+#       Postgres over localhost (same Pod, same network namespace) with the
+#       credentials from the EXISTING db-secret and serves pg_* metrics on :9187
+#   (2) the headless Service "db" gets a second port, "metrics" (9187), which the
+#       ServiceMonitor in 12-servicemonitor-postgres.yaml references by name.
+# The app's own metrics (db_up, todo_db_query_duration_seconds) only see the
+# app's side of the connection; the exporter shows the database's side:
+# connections, commits, cache hits, size.
+#
+#   kubectl apply -n student-NN -f day3/11-postgres-exporter.yaml
+#   kubectl get pods -w                      # db-0 is replaced, now 2/2 READY
+#   kubectl exec db-0 -c postgres -- wget -qO- http://localhost:9187/metrics | grep -E '^pg_up'
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  labels:
+    app: todo-db
+spec:
+  clusterIP: None
+  selector:
+    app: todo-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+    - name: metrics          # <- added: the exporter, scraped in-cluster only
+      port: 9187
+      targetPort: 9187
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  labels:
+    app: todo-db
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-db
+  template:
+    metadata:
+      labels:
+        app: todo-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          envFrom:
+            - secretRef:
+                name: db-secret
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - todo
+            initialDelaySeconds: 5
+            periodSeconds: 5
+        # <- added: the sidecar. Same Pod as Postgres, so "localhost" is the DB.
+        - name: metrics
+          image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+          ports:
+            - name: metrics
+              containerPort: 9187
+          env:
+            # user + password come from the existing db-secret; the connection
+            # string below is assembled from them by Kubernetes ($(VAR) expansion).
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: DATA_SOURCE_NAME
+              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:5432/todo?sslmode=disable
+          # TCP only: an HTTP probe on /metrics would query Postgres every time,
+          # and a slow database must not get the exporter restarted.
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        # storageClassName: longhorn

@@ -1,4 +1,4 @@
-# Day 4 / Lab 15 — a highly-available Postgres via the CloudNativePG (cnpg) operator.
+# Day 4 / Lab 4.3: a highly-available Postgres via the CloudNativePG (cnpg) operator.
 # ONE declarative Cluster → a primary + two replicas, a read-write Service that always
 # points at the current primary (db-rw), and an app Secret (db-app, basic-auth) holding
 # a ready-to-use connection string under the `uri` key. The operator is already

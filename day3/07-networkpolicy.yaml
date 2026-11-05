@@ -1,9 +1,9 @@
-# Day 3 / Lab 11 — lock down the DB: only the app may reach Postgres.
+# Day 3 / Lab 3.3: lock down the DB: only the app may reach Postgres.
 # Default in Kubernetes is "everyone talks to everyone". This policy selects the
 # DB Pods and allows ingress ONLY from Pods labelled app=todo, on port 5432.
 # Everything else (e.g. a debug Pod) is then blocked from the DB.
 #
-# NOTE: NetworkPolicies are enforced by the CNI — our cluster runs Canal (RKE2 default), so
+# NOTE: NetworkPolicies are enforced by the CNI; our cluster runs Canal (RKE2 default), so
 # they take effect. On a CNI that ignores them, this would be a no-op.
 #
 #   kubectl apply -n student-NN -f day3/07-networkpolicy.yaml

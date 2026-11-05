@@ -1,4 +1,4 @@
-# Day 3 / Lab 10a — VARIANT B (classic Ingress): the same goal, the other shape.
+# Day 3 / Lab 3.2 Part A (classic Ingress): the same goal, the other shape.
 # Pick ONE variant in the lab (the trainer says which). Both work in our cluster
 # (Traefik serves Ingress AND Gateway API on the same IP).
 #
@@ -13,8 +13,9 @@ metadata:
   labels:
     app: todo
   annotations:
-    # cert-manager watches this and issues a Let's Encrypt cert into app-tls
-    # (HTTP-01 challenge). The "how" is Day 4 — today it just happens.
+    # cert-manager watches this and issues a cert into app-tls (ACME HTTP-01
+    # challenge; the issuer is named "letsencrypt" but talks to ZeroSSL).
+    # The "how" is Day 4; today it just happens.
     cert-manager.io/cluster-issuer: letsencrypt
     # Serve on BOTH entrypoints: the redirect-https middleware (below) bounces
     # plain http (web) to https, and websecure serves the app over TLS. Listing

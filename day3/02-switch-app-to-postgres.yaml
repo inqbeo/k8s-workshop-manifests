@@ -1,4 +1,4 @@
-# Day 3 / Lab 9 — switch the app from SQLite to Postgres WITHOUT changing the image.
+# Day 3 / Lab 3.1: switch the app from SQLite to Postgres WITHOUT changing the image.
 # Two things change:
 #   (1) DB_DRIVER + DATABASE_URL  (ConfigMap/Secret)
 #   (2) the app no longer needs a local volume, so the SQLite PVC mount is REMOVED from
@@ -46,11 +46,11 @@ spec:
       labels:
         app: todo
     spec:
-      # securityContext:            # REMOVED — no mounted volume to make group-writable
+      # securityContext:            # REMOVED: no mounted volume to make group-writable
       #   fsGroup: 10001
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.4.0
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.6.0
           ports:
             - containerPort: 8080
           envFrom:
@@ -58,18 +58,18 @@ spec:
                 name: app-config
             - secretRef:
                 name: app-secret
-          # volumeMounts:           # REMOVED — the app no longer writes to /data
+          # volumeMounts:           # REMOVED: the app no longer writes to /data
           #   - name: data
           #     mountPath: /data
           livenessProbe:
-            httpGet: { path: /livez, port: 8080 }    # "alive?" — never depends on the DB
+            httpGet: { path: /livez, port: 8080 }    # "alive?": never depends on the DB
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?" — pings the DB
+            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?": pings the DB
             initialDelaySeconds: 3
             periodSeconds: 5
-      # volumes:                    # REMOVED — the app-data PVC is no longer used (delete it)
+      # volumes:                    # REMOVED: the app-data PVC is no longer used (delete it)
       #   - name: data
       #     persistentVolumeClaim:
       #       claimName: app-data

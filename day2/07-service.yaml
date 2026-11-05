@@ -1,4 +1,4 @@
-# Day 2 / Lab 8 — a stable address for the app (ClusterIP, internal). Reach it as: app:8080
+# Day 2 / Lab 2.5: a stable address for the app (ClusterIP, internal). Reach it as: app:8080
 apiVersion: v1
 kind: Service
 metadata:

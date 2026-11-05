@@ -1,4 +1,4 @@
-# Day 4 / Lab 13 — Kustomize base: the stateless app (same one, now packaged).
+# Day 4 / Lab 4.1: Kustomize base: the stateless app (same one, now packaged).
 # envFrom pulls the generated app-config (Kustomize rewrites the name to the
 # hash-suffixed one) and the pre-existing app-secret (AUTH_PASSWORD, DATABASE_URL).
 apiVersion: apps/v1
@@ -19,22 +19,22 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/inqbeo/containerization-demo-webapp:0.4.0
+          image: ghcr.io/inqbeo/containerization-demo-webapp:0.6.0
           ports:
             - name: http
               containerPort: 8080
             - name: metrics
-              containerPort: 8081    # /metrics (since 0.4.0) — scraped via the Service port "metrics"
+              containerPort: 8081    # /metrics, scraped via the Service port "metrics"
           envFrom:
             - configMapRef:
                 name: app-config       # generated below; the name reference is rewritten to app-config-<hash>
             - secretRef:
                 name: app-secret       # pre-existing from Day 2/3 (not managed by Kustomize)
           livenessProbe:
-            httpGet: { path: /livez, port: 8080 }    # "alive?" — never depends on the DB
+            httpGet: { path: /livez, port: 8080 }    # "alive?": never depends on the DB
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?" — pings the DB
+            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?": pings the DB
             initialDelaySeconds: 3
             periodSeconds: 5

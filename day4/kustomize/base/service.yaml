@@ -1,4 +1,4 @@
-# Day 4 / Lab 13 — Kustomize base: the ClusterIP Service for the app.
+# Day 4 / Lab 4.1: Kustomize base: the ClusterIP Service for the app.
 apiVersion: v1
 kind: Service
 metadata:

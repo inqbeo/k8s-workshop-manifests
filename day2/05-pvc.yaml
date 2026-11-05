@@ -1,4 +1,4 @@
-# Day 2 / Lab 7 — Persistent storage for /data (SQLite file survives Pod restarts)
+# Day 2 / Lab 2.4: Persistent storage for /data (SQLite file survives Pod restarts)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

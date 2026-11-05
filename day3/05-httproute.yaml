@@ -1,4 +1,4 @@
-# Day 3 / Lab 10b — VARIANT A (Gateway API), part 2 of 2: the HTTPRoute.
+# Day 3 / Lab 3.2 Part B (Gateway API), 2 of 2: the HTTPRoute.
 #
 # The app team's half: "this host -> my Service". It attaches to YOUR Gateway
 # (05-gateway.yaml) by parentRefs, in the same namespace. The Gateway does the

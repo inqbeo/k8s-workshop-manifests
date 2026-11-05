@@ -1,0 +1,47 @@
+# Day 3 / Lab 3.5: scrape the postgres_exporter sidecar (11-postgres-exporter.yaml).
+# Two objects, because Lab "NetworkPolicy" locked the DB Pod down:
+#   (1) a ServiceMonitor: select the Service "db" by label, scrape its port NAMED
+#       "metrics" (9187). Same pattern as 09-servicemonitor.yaml for the app.
+#   (2) a second NetworkPolicy for the DB Pod. 07-networkpolicy.yaml only admits
+#       app=todo on 5432; Prometheus lives in another namespace and would be
+#       blocked on 9187. Policies are additive (a union of allow rules), so this
+#       one adds "9187 from the monitoring namespace" without touching the first.
+#       Exactly the label-based-policy lesson from the NetworkPolicy lab again.
+#
+#   kubectl apply -n student-NN -f day3/12-servicemonitor-postgres.yaml
+#   # Prometheus UI → Status → Targets → serviceMonitor/student-NN/db/0 → 1 target UP
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: db
+  labels:
+    app: todo-db
+spec:
+  selector:
+    matchLabels:
+      app: todo-db          # the headless Service "db" carries this label
+  endpoints:
+    - port: metrics         # the Service's port NAME (9187), not "postgres"
+      path: /metrics
+      interval: 15s
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-allow-metrics
+  labels:
+    app: todo-db
+spec:
+  podSelector:
+    matchLabels:
+      app: todo-db          # the same DB Pods as 07-networkpolicy.yaml
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cattle-monitoring-system   # rancher-monitoring's Prometheus
+      ports:
+        - protocol: TCP
+          port: 9187        # the exporter only, 5432 stays app-only

@@ -1,10 +1,10 @@
-# Day 3 / Lab 12b — make YOUR app's metrics visible to the cluster's Prometheus.
+# Day 3 / Lab 3.5: make YOUR app's metrics visible to the cluster's Prometheus.
 # The todo app serves Prometheus metrics on GET /metrics (http_requests_total,
-# todos, db_up, …) on its separate metrics listener :8081 — exposed in-cluster as
+# todos, db_up, …) on its separate metrics listener :8081, exposed in-cluster as
 # Service port "metrics" (08-metrics-port.yaml). The platform's Prometheus
 # Operator (rancher-monitoring) watches ServiceMonitor objects in every namespace
 # and rewrites its scrape config: select the Service by label, scrape every Pod
-# behind it — INCLUDING Pods that are not Ready. (Readiness only removes a Pod
+# behind it, INCLUDING Pods that are not Ready. (Readiness only removes a Pod
 # from the Service's load-balancing; the Operator discovers Pod IPs through the
 # Endpoints object, where not-ready Pods are still listed. That is why db_up
 # keeps reporting 0 while the DB is down instead of the target disappearing.)
@@ -22,6 +22,6 @@ spec:
     matchLabels:
       app: todo             # the Day-2 Service "app" carries this label
   endpoints:
-    - port: metrics         # the Service's port NAME (not the number!) — 8081, not "http"
+    - port: metrics         # the Service's port NAME (not the number!): 8081, not "http"
       path: /metrics
       interval: 15s
