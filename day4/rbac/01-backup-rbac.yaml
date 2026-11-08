@@ -1,10 +1,14 @@
 # Day 4 / Lab 4.3: a backup CronJob with its OWN identity.
-# Four objects, deliberately WITHOUT the RoleBinding (that is 02-backup-rolebinding.yaml):
+# Five objects, deliberately WITHOUT the RoleBinding (that is 02-backup-rolebinding.yaml):
 #   ServiceAccount backup   the identity the Job's Pod runs as
 #   Role backup             what that identity may do: read Pods, exec into them
 #   PVC backup              where the dumps land
 #   CronJob backup          runs `pg_dump` INSIDE the Day-3 Postgres Pod db-0 via the
 #                           Kubernetes API (kubectl exec), no DB password in the Job
+#   Pod backup-shell        a sleeping helper running AS the same ServiceAccount, so you
+#                           can ask "may I?" from inside: kubectl exec backup-shell -- kubectl auth can-i ...
+#                           (kubectl --as needs the impersonate right, which the lab's
+#                           Rancher proxy does not pass on; asking from inside always works)
 #
 #   kubectl apply -n <your-namespace> -f day4/rbac/01-backup-rbac.yaml
 #   kubectl create job --from=cronjob/backup backup-now     # run it right now
@@ -93,3 +97,25 @@ spec:
             - name: backup
               persistentVolumeClaim:
                 claimName: backup
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-shell
+  labels:
+    app: todo-backup
+spec:
+  serviceAccountName: backup       # same identity as the CronJob's Pods
+  containers:
+    - name: shell
+      image: alpine/k8s:1.31.13
+      command:
+        - sleep
+        - infinity
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi

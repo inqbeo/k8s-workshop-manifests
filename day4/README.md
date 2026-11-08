@@ -63,7 +63,7 @@ kubectl apply -n $NS -f rbac/01-backup-rbac.yaml
 kubectl -n $NS create job --from=cronjob/backup backup-now && kubectl -n $NS logs job/backup-now   # Forbidden
 sed -i "s/studentNN/$NS/" rbac/02-backup-rolebinding.yaml
 kubectl apply -n $NS -f rbac/02-backup-rolebinding.yaml
-kubectl auth can-i create pods/exec --as=system:serviceaccount:$NS:backup -n $NS   # yes
+kubectl -n $NS exec backup-shell -- kubectl auth can-i create pods/exec   # yes (asked AS the SA, from inside)
 
 # Lab 4.4: HA Postgres via cnpg, then one helm upgrade
 kubectl apply -n $NS -f 01-pg-cluster.yaml
