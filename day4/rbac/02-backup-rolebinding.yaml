@@ -1,0 +1,22 @@
+# Day 4 / Lab 4.3: the missing piece. A Role is only a description of rights;
+# the RoleBinding GRANTS it to a subject (here: the ServiceAccount backup).
+# A ServiceAccount subject must name its namespace, so the file ships with the
+# studentNN placeholder and the guide seds YOUR namespace in (like values.yaml):
+#
+#   sed -i "s/studentNN/<your-namespace>/" day4/rbac/02-backup-rolebinding.yaml
+#   kubectl apply -n <your-namespace> -f day4/rbac/02-backup-rolebinding.yaml
+#   kubectl auth can-i create pods/exec --as=system:serviceaccount:<your-namespace>:backup   # yes
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backup
+  labels:
+    app: todo-backup
+subjects:
+  - kind: ServiceAccount
+    name: backup
+    namespace: studentNN             # required for ServiceAccount subjects (the sed fills it)
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: backup

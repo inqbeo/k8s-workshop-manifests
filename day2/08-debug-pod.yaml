@@ -10,4 +10,6 @@ spec:
   containers:
     - name: tools
       image: wbitt/network-multitool
-      command: ["sleep", "infinity"]
+      command:
+        - "sleep"
+        - "infinity"

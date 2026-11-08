@@ -62,11 +62,15 @@ spec:
           #   - name: data
           #     mountPath: /data
           livenessProbe:
-            httpGet: { path: /livez, port: 8080 }    # "alive?": never depends on the DB
+            httpGet:    # "alive?": never depends on the DB
+              path: /livez
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-            httpGet: { path: /readyz, port: 8080 }   # "ready for traffic?": pings the DB
+            httpGet:   # "ready for traffic?": pings the DB
+              path: /readyz
+              port: 8080
             initialDelaySeconds: 3
             periodSeconds: 5
       # volumes:                    # REMOVED: the app-data PVC is no longer used (delete it)

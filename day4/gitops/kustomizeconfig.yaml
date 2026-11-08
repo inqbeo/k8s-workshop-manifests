@@ -1,4 +1,4 @@
-# Day 4 / Lab 4.4: Kustomize name-reference config.
+# Day 4 / Lab 4.5: Kustomize name-reference config.
 #
 # The configMapGenerator produces a hash-suffixed ConfigMap (e.g. "todo-values-9f7c2k").
 # Kustomize already rewrites references to it inside built-in types, but a Flux

@@ -2,7 +2,7 @@
 # (oci://ghcr.io/inqbeo/charts/todo). The lab guide writes this with YOUR namespace
 # filled in; this committed copy uses the studentNN placeholder (the guide seds it).
 #
-# In Lab 4.4 this same file moves into your Gitea repo and Flux renders the chart with it.
+# In Lab 4.5 this same file moves into your Gitea repo and Flux renders the chart with it.
 replicaCount: 1
 
 app:
@@ -19,7 +19,7 @@ database:
     external:
       # A Secret holding a ready-to-use connection string under the `uri` key.
       #  - Lab 4.2: you create it by hand for the Day-3 Postgres (db:5432).
-      #  - Lab 4.3: switch this to cnpg's auto-made `db-app` Secret (it ships a `uri`).
+      #  - Lab 4.4: switch this to cnpg's auto-made `db-app` Secret (it ships a `uri`).
       existingSecret: todo-db-uri
       uriKey: uri
 
@@ -38,9 +38,12 @@ ingress:
       hosts:
         - app-studentNN.k8s-workshop.inqbeo.academy
 
-# Day 3's ServiceMonitor, now as one chart value: the platform's Prometheus keeps
-# scraping the app (http_requests_total, todos, db_up) after the move to Helm:
-# and via GitOps in Lab 4.4. (Needs the Prometheus Operator; it's installed.)
+# Day 3's ServiceMonitor as one chart value. It ships OFF: Lab 4.2 first installs the
+# release without it, then turns it on with `helm upgrade -f values.yaml --set
+# serviceMonitor.enabled=true` (watch the ServiceMonitor appear, `helm history`,
+# `helm get values`, roll back and forward), and finally flips it to true HERE so the
+# platform's Prometheus keeps scraping the app (http_requests_total, todos, db_up)
+# from then on, and via GitOps in Lab 4.5. (Needs the Prometheus Operator; it's installed.)
 serviceMonitor:
-  enabled: true
+  enabled: false
   interval: 15s

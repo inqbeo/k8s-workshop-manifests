@@ -30,12 +30,23 @@ spec:
             - name: PGHOST
               value: db
             - name: PGUSER
-              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_USER } }
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
             - name: PGPASSWORD
-              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_PASSWORD } }
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
             - name: PGDATABASE
-              valueFrom: { secretKeyRef: { name: db-secret, key: POSTGRES_DB } }
-          command: ["/bin/sh", "-c"]
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_DB
+          command:
+            - "/bin/sh"
+            - "-c"
           args:
             - |
               set -e

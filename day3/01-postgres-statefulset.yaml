@@ -65,14 +65,18 @@ spec:
               mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "todo"]
+              command:
+                - "pg_isready"
+                - "-U"
+                - "todo"
             initialDelaySeconds: 5
             periodSeconds: 5
   volumeClaimTemplates:
     - metadata:
         name: pgdata
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+          - "ReadWriteOnce"
         resources:
           requests:
             storage: 1Gi

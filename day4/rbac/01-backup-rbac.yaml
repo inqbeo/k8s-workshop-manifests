@@ -1,0 +1,95 @@
+# Day 4 / Lab 4.3: a backup CronJob with its OWN identity.
+# Four objects, deliberately WITHOUT the RoleBinding (that is 02-backup-rolebinding.yaml):
+#   ServiceAccount backup   the identity the Job's Pod runs as
+#   Role backup             what that identity may do: read Pods, exec into them
+#   PVC backup              where the dumps land
+#   CronJob backup          runs `pg_dump` INSIDE the Day-3 Postgres Pod db-0 via the
+#                           Kubernetes API (kubectl exec), no DB password in the Job
+#
+#   kubectl apply -n <your-namespace> -f day4/rbac/01-backup-rbac.yaml
+#   kubectl create job --from=cronjob/backup backup-now     # run it right now
+#   kubectl logs job/backup-now                              # Forbidden, until 02- is applied
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup
+  labels:
+    app: todo-backup
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: backup
+  labels:
+    app: todo-backup
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec          # a SUBresource: exec is not "get pod"
+    verbs:
+      - create
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  labels:
+    app: todo-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup
+  labels:
+    app: todo-backup
+spec:
+  schedule: "0 2 * * *"              # nightly at 02:00; the lab triggers it by hand
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: todo-backup
+        spec:
+          serviceAccountName: backup          # <- the identity this Pod calls the API as
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: alpine/k8s:1.31.13       # upstream image with kubectl and a shell
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  set -e
+                  F=/backup/todo-$(date +%F-%H%M).sql
+                  # db-0 is the Day-3 StatefulSet's Pod; "-c postgres" because the
+                  # observability lab added a metrics sidecar to it
+                  kubectl exec db-0 -c postgres -- pg_dump -U todo todo > "$F"
+                  ls -l /backup
+                  head -5 "$F"
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup
