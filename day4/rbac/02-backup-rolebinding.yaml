@@ -5,7 +5,7 @@
 #
 #   sed -i "s/studentNN/<your-namespace>/" day4/rbac/02-backup-rolebinding.yaml
 #   kubectl apply -n <your-namespace> -f day4/rbac/02-backup-rolebinding.yaml
-#   kubectl auth can-i create pods/exec --as=system:serviceaccount:<your-namespace>:backup   # yes
+#   kubectl exec backup-shell -- kubectl auth can-i create pods --subresource=exec   # yes
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
