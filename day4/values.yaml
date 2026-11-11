@@ -39,11 +39,10 @@ ingress:
         - app-studentNN.k8s-workshop.inqbeo.academy
 
 # Day 3's ServiceMonitor as one chart value. It ships OFF: Lab 4.2 first installs the
-# release without it, then turns it on with `helm upgrade -f values.yaml --set
-# serviceMonitor.enabled=true` (watch the ServiceMonitor appear, `helm history`,
-# `helm get values`, roll back and forward), and finally flips it to true HERE so the
-# platform's Prometheus keeps scraping the app (http_requests_total, todos, db_up)
-# from then on, and via GitOps in Lab 4.5. (Needs the Prometheus Operator; it's installed.)
+# release without it, then flips it to true HERE and runs `helm upgrade -f values.yaml`
+# (revision 2: the ServiceMonitor appears; then rollback to 1 and back to 2). From then
+# on the platform's Prometheus scrapes the app, and via GitOps in Lab 4.5. (Needs the
+# Prometheus Operator; it's installed.)
 serviceMonitor:
   enabled: false
   interval: 15s

@@ -54,9 +54,9 @@ kubectl -n $NS create secret generic todo-db-uri \
 helm install todo oci://ghcr.io/inqbeo/charts/todo --version 0.6.0 -n $NS -f ~/values.yaml
 #   (the Day-3 NetworkPolicy only admits app=todo; the lab extends it by JSON patch)
 
-helm upgrade todo oci://ghcr.io/inqbeo/charts/todo --version 0.6.0 -n $NS -f ~/values.yaml \
-  --set serviceMonitor.enabled=true           # rev 2: a ServiceMonitor appears; then helm history / rollback
-sed -i '/^serviceMonitor:/,$ s/enabled: false/enabled: true/' ~/values.yaml   # make it permanent in the file
+sed -i '/^serviceMonitor:/,$ s/enabled: false/enabled: true/' ~/values.yaml   # switch it on in the file
+helm upgrade todo oci://ghcr.io/inqbeo/charts/todo --version 0.6.0 -n $NS -f ~/values.yaml
+#   rev 2: a ServiceMonitor appears; then helm history, rollback to 1 and back to 2
 
 # Lab 4.3: RBAC: a backup CronJob with its own ServiceAccount (fails Forbidden, then bind)
 kubectl apply -n $NS -f rbac/01-backup-rbac.yaml
